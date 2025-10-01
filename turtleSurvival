@@ -1,0 +1,84 @@
+import turtle
+import tutelMoves
+wn = turtle.Screen()
+wn.title("Survival")
+wn.bgcolor("antiqueWhite")
+wn.setup(500, 500)
+
+score = 0
+health = 5
+
+
+tutel = turtle.Turtle()
+tutel.color("saddleBrown")
+tutel.shape("turtle")
+tutel.speed(6)
+
+obstacle = turtle.Turtle()
+obstacle.color("maroon")
+obstacle.shape("square")
+obstacle.up()
+obstacle.goto(0, 250)
+
+tutel.up()
+tutel.goto(-50, 25)
+tutel.write("Press Space to begin!")
+tutel.goto(0, 0)
+
+
+
+# movement funcs
+def moveAhead():
+    tutelMoves.moveFd(tutel)
+def moveBehind():
+    tutelMoves.moveBkwd(tutel)
+def rotLeft():
+    tutelMoves.turnLeft(tutel)
+def rotRight():
+    tutelMoves.turnRight(tutel)
+
+# Obstacle functions
+def beginChase():
+    tutel.clear()
+    tutel.goto(-245, 220)
+    tutel.write(f"Dodge the Obstacles! \nScore: {score}  Health: {health}")
+    tutel.goto(0, 0)
+    obstacle.speed(2)
+    obstacle.right(90)
+    obstacle.forward(500)
+    obstacle.speed(3)
+    wn.onkey(None, "space")
+    
+def minimizeZone():
+    obstacle.goto(-225, 225)
+    obstacle.setheading(0)
+    for h in range(4):
+        for j in range(90):
+            obstacle.stamp()
+            obstacle.forward(5)
+        obstacle.right(90)
+    print("Unfinished")
+    # Make it so obstacle leaves a trail that decreases the safe area on screen
+
+
+
+# key input detectors
+wn.onkey(beginChase, "space")
+
+wn.onkey(minimizeZone, "t")
+
+
+wn.onkey(moveAhead, "w")
+wn.onkey(moveBehind, "s")
+wn.onkey(rotLeft, "a")
+wn.onkey(rotRight, "d")
+
+wn.listen()
+
+
+
+wn.exitonclick()
+
+
+
+
