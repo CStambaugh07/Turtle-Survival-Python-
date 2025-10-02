@@ -1,84 +1,140 @@
 import turtle
-import tutelMoves
+import turMoves
+# intializing objects
+''' Screen '''
 wn = turtle.Screen()
 wn.title("Survival")
 wn.bgcolor("antiqueWhite")
 wn.setup(500, 500)
+wn.delay(20)
 
+''' Variables '''
 score = 0
 health = 5
 
-
+''' Player Turtle'''
 tutel = turtle.Turtle()
 tutel.color("saddleBrown")
 tutel.shape("turtle")
 tutel.speed(6)
 
+''' enemy turtle '''
 obstacle = turtle.Turtle()
 obstacle.color("maroon")
 obstacle.shape("square")
 obstacle.up()
-obstacle.goto(0, 250)
+obstacle.goto(-200, -275)
 
+# writes the starting message 
 tutel.up()
+tutel.goto(-115, 50)
+tutel.write("(W = forwards, A/D = left/right, S = backwards)")
 tutel.goto(-50, 25)
 tutel.write("Press Space to begin!")
 tutel.goto(0, 0)
 
+''' 
+--- TO DO ---
+- add attacks and hit detection (!!!)
+- thoroughly test the wall code to make sure it functions as intended
+- refine existing movement
+- potentially remove turning; it slows movement down too much
+'''
 
-
-# movement funcs
+# movement funcs (calls a function from tutelMoves)
 def moveAhead():
-    tutelMoves.moveFd(tutel)
+    wn.onkeypress(None, "w")
+    turMoves.moveFd(tutel)
+    # a beefy bit of conditionals meant to keep the player trapped in the zone
+    if tutel.xcor() > 195:
+        tutel.goto(180, tutel.ycor())
+    elif tutel.xcor() < -195:  
+        tutel.goto(-180, tutel.ycor())
+
+    if tutel.ycor() > 195:
+        tutel.goto(tutel.xcor(), 180)
+    elif tutel.ycor() < -195:  
+        tutel.goto(tutel.xcor(), -180)
+    wn.onkeypress(moveAhead, "w")
+
 def moveBehind():
-    tutelMoves.moveBkwd(tutel)
+    turMoves.moveBkwd(tutel)
+    # same as above
+    if tutel.xcor() > 195:
+        tutel.goto(180, tutel.ycor())
+    elif tutel.xcor() < -195:  
+        tutel.goto(-180, tutel.ycor())
+
+    if tutel.ycor() > 195:
+        tutel.goto(tutel.xcor(), 180)
+    elif tutel.ycor() < -195:  
+        tutel.goto(tutel.xcor(), -180)
+# turning
 def rotLeft():
-    tutelMoves.turnLeft(tutel)
+    wn.onkeypress(None, "a")
+    turMoves.turnLeft(tutel)
+    wn.onkeypress(rotLeft, "a")
+    
 def rotRight():
-    tutelMoves.turnRight(tutel)
+    wn.onkeypress(None, "d")
+    turMoves.turnRight(tutel)
+    wn.onkeypress(rotRight, "d")
 
 # Obstacle functions
+# these may be moved to another file, to clean up the main file a bit
 def beginChase():
+    # obstacle appears on screen, before creating an area to trap the player in
     tutel.clear()
     tutel.goto(-245, 220)
     tutel.write(f"Dodge the Obstacles! \nScore: {score}  Health: {health}")
     tutel.goto(0, 0)
+    '''
     obstacle.speed(2)
     obstacle.right(90)
     obstacle.forward(500)
     obstacle.speed(3)
+    '''
+    createZone()
     wn.onkey(None, "space")
+    # potentially switch this to onkeypress so that movement feels better
+    # (requires adding a reasonable input limit)
+    wn.onkey(moveAhead, "w")
+    wn.onkey(moveBehind, "s")
+    wn.onkeypress(rotLeft, "a")
+    wn.onkey(rotRight, "d")
     
-def minimizeZone():
-    obstacle.goto(-225, 225)
-    obstacle.setheading(0)
+def createZone():
+    # creates a border on the screen for player turtle to be trapped in
+    obstacle.setheading(90)
+    obstacle.goto(-200, -200)
+    obstacle.right(90)
     for h in range(4):
-        for j in range(90):
+        for j in range(80):
             obstacle.stamp()
             obstacle.forward(5)
-        obstacle.right(90)
+        obstacle.left(90)
     print("Unfinished")
-    # Make it so obstacle leaves a trail that decreases the safe area on screen
 
 
 
-# key input detectors
+# key input detectors not contained in a function
 wn.onkey(beginChase, "space")
+# below input(s) are for testing purposes only; remove in final version
+wn.onkey(createZone, "t")
+wn.onkeypress(rotLeft, "a")
+wn.onkeypress(rotRight, "d")
+wn.onkeypress(moveAhead, "w")
 
-wn.onkey(minimizeZone, "t")
 
-
-wn.onkey(moveAhead, "w")
-wn.onkey(moveBehind, "s")
-wn.onkey(rotLeft, "a")
-wn.onkey(rotRight, "d")
-
+# obligatory listen func
 wn.listen()
 
 
 
+
+
+
+
+
+
 wn.exitonclick()
-
-
-
-
