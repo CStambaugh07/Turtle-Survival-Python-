@@ -1,140 +1,320 @@
 import turtle
-import turMoves
+# setup funcs
+''' Creates the grid the game is played on'''
+def createGrid():
+    tutel.up()
+    tutel.goto(-200, 200)
+    tutel.down()
+    tutel.speed(0)
+    # horizontal lines
+    for i in range(8):
+        tutel.setheading(270)
+        tutel.forward(25)
+        tutel.left(90)
+        tutel.forward(400)
+        tutel.right(90)
+        tutel.forward(25)
+        tutel.right(90)
+        tutel.forward(400)
+    # vertical lines
+    tutel.up()
+    tutel.goto(-200, 200)
+    tutel.down()
+    for i in range(8):
+        tutel.setheading(0)
+        tutel.forward(25)
+        tutel.right(90)
+        tutel.forward(400)
+        tutel.left(90)
+        tutel.forward(25)
+        tutel.left(90)
+        tutel.forward(400)
+    tutel.up()
+    
 # intializing objects
 ''' Screen '''
 wn = turtle.Screen()
 wn.title("Survival")
 wn.bgcolor("antiqueWhite")
 wn.setup(500, 500)
-wn.delay(20)
 
 ''' Variables '''
-score = 0
-health = 5
+score = 0  #increments everytime the player moves
+obsCooldown = 0  # is used to decide which group of obstacles moves each turn
 
 ''' Player Turtle'''
 tutel = turtle.Turtle()
 tutel.color("saddleBrown")
 tutel.shape("turtle")
-tutel.speed(6)
+tutel.speed(4)
 
-''' enemy turtle '''
-obstacle = turtle.Turtle()
-obstacle.color("maroon")
-obstacle.shape("square")
-obstacle.up()
-obstacle.goto(-200, -275)
+''' enemy/obstacle turtle(s) '''
+obs1 = turtle.Turtle()
+obs1.color("maroon")
+obs1.shape("square")
+obs1.up()
+obs1.ht()
+obs1.goto(-200, -275)
+
+obs2 = turtle.Turtle()
+obs2.color("lightSalmon")
+obs2.shape("square")
+obs2.up()
+obs2.ht()
+obs2.goto(200, 275)
+
+obs3 = turtle.Turtle()
+obs3.color("coral")
+obs3.shape("square")
+obs3.up()
+obs3.ht()
+obs3.goto(200, -275)
+
+obs4 = turtle.Turtle()
+obs4.color("DarkOrange")
+obs4.shape("square")
+obs4.up()
+obs4.ht()
+obs4.goto(-200, 275)
+
+obsMain = turtle.Turtle()
+obsMain.color("orchid")
+obsMain.shape("circle")
+obsMain.ht()
+obsMain.up()
+obsMain.goto(0, 275)
+
+''' Miscellaneous'''
+writer = turtle.Turtle()
+writer.color("saddleBrown")
+writer.speed(10)
+writer.up()
+writer.ht()
+writer.goto(-245, 220)
 
 # writes the starting message 
 tutel.up()
+tutel.ht()
 tutel.goto(-115, 50)
-tutel.write("(W = forwards, A/D = left/right, S = backwards)")
+tutel.write("(W = upwards, A/D = left/right, S = downwards)")
 tutel.goto(-50, 25)
 tutel.write("Press Space to begin!")
 tutel.goto(0, 0)
+tutel.st()
 
-''' 
---- TO DO ---
-- add attacks and hit detection (!!!)
-- thoroughly test the wall code to make sure it functions as intended
-- refine existing movement
-- potentially remove turning; it slows movement down too much
-'''
+# unBind All (primarily used to limit inputs happening during a move)
+def unBindAll():
+    wn.onkey(None, "w")
+    wn.onkey(None, "a")
+    wn.onkey(None, "s")
+    wn.onkey(None, "d")
+# reBind all
+def reBindAll():
+    wn.onkey(moveUp, "w")
+    wn.onkey(moveLeft, "a")
+    wn.onkey(moveDown, "s")
+    wn.onkey(moveRight, "d")
 
-# movement funcs (calls a function from tutelMoves)
-def moveAhead():
-    wn.onkeypress(None, "w")
-    turMoves.moveFd(tutel)
-    # a beefy bit of conditionals meant to keep the player trapped in the zone
-    if tutel.xcor() > 195:
-        tutel.goto(180, tutel.ycor())
-    elif tutel.xcor() < -195:  
-        tutel.goto(-180, tutel.ycor())
-
+# checkTutel - Checks if any of the obstacles have reached the tutel.
+# ends the game if tutel and any obstacle are sharing a space; adds points otherwise
+def checkTutel():
+    global score 
+    if (tutel.pos() == obs1.pos()) or (tutel.pos() == obs2.pos()) or (tutel.pos() == obs3.pos()) or (tutel.pos() == obsMain.pos()):
+        print("Oh No!")
+        unBindAll()
+        obs1.ht()
+        obs2.ht()
+        obs3.ht()
+        obs4.ht()
+        obsMain.ht()
+        tutel.clear()
+        writer.goto(tutel.xcor(), tutel.ycor() + 45)
+        writer.write("Oh No!")
+        tutel.left(720)
+        tutel.ht()
+        writer.clear()
+        writer.goto(-50, 0)
+        writer.write("Game Over!", font=("Arial", 16, "normal"))
+        writer.goto(-105, -15)
+        writer.write(f"Your score was {score}. Think you can improve it?")
+    else:
+        score += 1
+        writer.clear()
+        writer.write(f"Dodge the Obstacles! \nScore: {score}")
+        
+# movement funcs
+# vertical
+'''Up'''
+def moveUp():
+    unBindAll()
+    tutel.setheading(90)
+    tutel.sety(tutel.ycor() + 25)
+    # a little conditional meant to keep the player trapped in the zone
     if tutel.ycor() > 195:
-        tutel.goto(tutel.xcor(), 180)
+        tutel.goto(tutel.xcor(), 175)
     elif tutel.ycor() < -195:  
-        tutel.goto(tutel.xcor(), -180)
-    wn.onkeypress(moveAhead, "w")
-
-def moveBehind():
-    turMoves.moveBkwd(tutel)
+        tutel.goto(tutel.xcor(), -175)
+    coordinateObstacles()
+    checkTutel()
+    reBindAll()
+'''Down'''
+def moveDown():
+    unBindAll()
+    tutel.setheading(270)
+    tutel.sety(tutel.ycor() - 25)
+    # same as above
+    if tutel.ycor() > 195:
+        tutel.goto(tutel.xcor(), 175)
+    elif tutel.ycor() < -195:  
+        tutel.goto(tutel.xcor(), -175)
+    coordinateObstacles()
+    checkTutel()
+    reBindAll()
+# horizontal
+'''Left'''
+def moveLeft():
+    unBindAll()
+    tutel.setheading(180)
+    tutel.setx(tutel.xcor() - 25) 
+    # same conditional, but for the x-axis
+    if tutel.xcor() > 195:
+        tutel.goto(175, tutel.ycor())
+    elif tutel.xcor() < -195:  
+        tutel.goto(-175, tutel.ycor()) 
+    coordinateObstacles()
+    checkTutel()
+    reBindAll()
+'''Right'''
+def moveRight():
+    unBindAll()
+    tutel.setheading(0)
+    tutel.setx(tutel.xcor() + 25)
     # same as above
     if tutel.xcor() > 195:
-        tutel.goto(180, tutel.ycor())
+        tutel.goto(175, tutel.ycor())
     elif tutel.xcor() < -195:  
-        tutel.goto(-180, tutel.ycor())
-
-    if tutel.ycor() > 195:
-        tutel.goto(tutel.xcor(), 180)
-    elif tutel.ycor() < -195:  
-        tutel.goto(tutel.xcor(), -180)
-# turning
-def rotLeft():
-    wn.onkeypress(None, "a")
-    turMoves.turnLeft(tutel)
-    wn.onkeypress(rotLeft, "a")
+        tutel.goto(-175, tutel.ycor())
+    coordinateObstacles()
+    checkTutel()
+    reBindAll()
     
-def rotRight():
-    wn.onkeypress(None, "d")
-    turMoves.turnRight(tutel)
-    wn.onkeypress(rotRight, "d")
-
 # Obstacle functions
-# these may be moved to another file, to clean up the main file a bit
 def beginChase():
     # obstacle appears on screen, before creating an area to trap the player in
     tutel.clear()
-    tutel.goto(-245, 220)
-    tutel.write(f"Dodge the Obstacles! \nScore: {score}  Health: {health}")
+    createGrid()
+    writer.write(f"Dodge the Obstacles! \nScore: {score}")
     tutel.goto(0, 0)
-    '''
-    obstacle.speed(2)
-    obstacle.right(90)
-    obstacle.forward(500)
-    obstacle.speed(3)
-    '''
+    tutel.speed(4)
+    
     createZone()
     wn.onkey(None, "space")
-    # potentially switch this to onkeypress so that movement feels better
-    # (requires adding a reasonable input limit)
-    wn.onkey(moveAhead, "w")
-    wn.onkey(moveBehind, "s")
-    wn.onkeypress(rotLeft, "a")
-    wn.onkey(rotRight, "d")
+    obs1.color("orange")
+    reBindAll()
     
+# creates a border on the screen for player turtle to be trapped in
 def createZone():
-    # creates a border on the screen for player turtle to be trapped in
-    obstacle.setheading(90)
-    obstacle.goto(-200, -200)
-    obstacle.right(90)
+    obs1.st()
+    obs2.st()
+    obs3.st()
+    obs4.st()
+    obsMain.st()
+    # obs1 draws the zone borders with stamp()
+    obs1.setheading(90)
+    obs1.goto(-200, -200)
+    obs1.right(90)
+    tutel.setheading(225)
     for h in range(4):
         for j in range(80):
-            obstacle.stamp()
-            obstacle.forward(5)
-        obstacle.left(90)
-    print("Unfinished")
+            obs1.stamp()
+            obs1.forward(5)
+        tutel.left(90)
+        obs1.left(90)
+    print(obs1.pos())
+    obs2.goto(200, 200)
+    obs3.goto(200, -200)
+    obs4.goto(-200, 200)
+    obsMain.goto(0, 200)
 
+def coordinateObstacles():
+    global obsCooldown
+    if obsCooldown == 0:
+        updateObs1()
+        updateObs4()
+        obsCooldown = 1
+    else:
+        updateObs2()
+        updateObs3()
+        updateMainObstacle()
+        obsCooldown = 0
 
+# Obs 1 updater (obs1 and obs4 move together)
+def updateObs1():
+        if tutel.ycor() != obs1.ycor():
+            if tutel.ycor() > obs1.ycor():
+                obs1.sety(obs1.ycor() + 25)
+            else:
+                obs1.sety(obs1.ycor() - 25)
+        else:
+            if tutel.xcor() > obs1.xcor():
+                obs1.setx(obs1.xcor() + 25)
+            else:
+                obs1.setx(obs1.xcor() - 25)
+# Obs 2 updater (obs2 and obs3 move together)
+def updateObs2():
+    if tutel.ycor() != obs2.ycor():
+        if tutel.ycor() > obs2.ycor():
+            obs2.sety(obs2.ycor() + 25)
+        else:
+            obs2.sety(obs2.ycor() - 25)
+    else:
+        if tutel.xcor() > obs2.xcor():
+            obs2.setx(obs2.xcor() + 25)
+        else:
+            obs2.setx(obs2.xcor() - 25) 
+# Obs 3 updater (obs3 and obs2 move together)
+def updateObs3():
+    if tutel.xcor() != obs3.xcor():
+        if tutel.xcor() > obs3.xcor():
+            obs3.setx(obs3.xcor() + 25)
+        else:
+            obs3.setx(obs3.xcor() - 25)
+    else:
+        if tutel.ycor() > obs3.ycor():
+            obs3.sety(obs3.ycor() + 25)
+        else:
+            obs3.sety(obs3.ycor() - 25) 
+# Obs 4 updater (obs4 and obs1 move together)
+def updateObs4():
+    if tutel.xcor() != obs4.xcor():
+        if tutel.xcor() > obs4.xcor():
+            obs4.setx(obs4.xcor() + 25)
+        else:
+            obs4.setx(obs4.xcor() - 25)
+    else:
+        if tutel.ycor() > obs4.ycor():
+            obs4.sety(obs4.ycor() + 25)
+        else:
+            obs4.sety(obs4.ycor() - 25) 
+
+# Main Obstacle is unqiue in it that it instead of favoring one axis or the other,
+# it just chooses whichever is greater
+# it also moves with obs2 and obs3
+def updateMainObstacle():
+    if abs(tutel.xcor() - obsMain.xcor()) > abs(tutel.ycor() - obsMain.ycor()):
+        if tutel.xcor() > obsMain.xcor():
+            obsMain.setx(obsMain.xcor() + 25)
+        else:
+            obsMain.setx(obsMain.xcor() - 25)
+    else:
+        if tutel.ycor() > obsMain.ycor():
+            obsMain.sety(obsMain.ycor() + 25)
+        else:
+            obsMain.sety(obsMain.ycor() - 25) 
 
 # key input detectors not contained in a function
 wn.onkey(beginChase, "space")
-# below input(s) are for testing purposes only; remove in final version
-wn.onkey(createZone, "t")
-wn.onkeypress(rotLeft, "a")
-wn.onkeypress(rotRight, "d")
-wn.onkeypress(moveAhead, "w")
-
-
 # obligatory listen func
 wn.listen()
-
-
-
-
-
-
-
-
-
+###
 wn.exitonclick()
